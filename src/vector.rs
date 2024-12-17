@@ -52,9 +52,12 @@ impl Vector3 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
 
-    pub fn normalize(self) -> Self {
+    pub fn normalize(&mut self) -> &Self {
         let l = self.length();
-        Self::new(self.x / l, self.y / l, self.z / l)
+        self.x /= l;
+        self.y /= l;
+        self.z /= l;
+        self
     }
 }
 
@@ -72,7 +75,7 @@ impl Debug for Vector3 {
 
 impl Default for Vector3 {
     fn default() -> Vector3 {
-        Vector3::new(0.0, 0.0, 0.0)
+        Vector3::zero()
     }
 }
 
@@ -85,12 +88,6 @@ impl Clone for Vector3 {
 impl From<(f64, f64, f64)> for Vector3 {
     fn from(tuple: (f64, f64, f64)) -> Vector3 {
         Vector3::new(tuple.0, tuple.1, tuple.2)
-    }
-}
-
-impl Into<(f64, f64, f64)> for Vector3 {
-    fn into(self) -> (f64, f64, f64) {
-        (self.x, self.y, self.z)
     }
 }
 

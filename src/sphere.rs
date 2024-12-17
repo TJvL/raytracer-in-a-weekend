@@ -8,7 +8,7 @@ pub struct Sphere {
 }
 
 impl Sphere {
-    fn new(center: Vector3, radius: f64) -> Self {
+    pub fn new(center: Vector3, radius: f64) -> Self {
         Self { center, radius }
     }
 }
@@ -25,6 +25,7 @@ impl Hittable for Sphere {
             None
         } else {
             let sqrt_d = discriminant.sqrt();
+            
             let mut root = (h - sqrt_d) / a;
 
             if root < t_min || t_max < root {
@@ -35,9 +36,9 @@ impl Hittable for Sphere {
             }
 
             let point = ray.at(root);
-            let normal = (&point - &self.center) / self.radius;
+            let outward_normal = (&point - &self.center) / self.radius;
 
-            Some(HitRecord::new(point, normal, root))
+            Some(HitRecord::new(point, root, outward_normal, &ray.direction))
         }
     }
 }

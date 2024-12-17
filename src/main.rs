@@ -1,7 +1,10 @@
 extern crate core;
 
+use std::f64::consts::PI;
+use crate::hit::{Hittable, HittableList};
 use crate::ray::Ray;
-use crate::vector::{dot, unit_vector, Vector3};
+use crate::sphere::Sphere;
+use crate::vector::{unit_vector, Vector3};
 
 mod hit;
 mod ray;
@@ -16,6 +19,10 @@ fn main() {
     } else {
         image_width / aspect_ratio
     };
+    
+    let mut world = HittableList::new();
+    world.add(Box::new(Sphere::new(Vector3::new(0.0, 0.0, -1.0), 0.5)));
+    world.add(Box::new(Sphere::new(Vector3::new(0.0, -100.5, -1.0), 100.0)));
 
     let focal_length = 1.0;
     let viewport_height = 2.0;
@@ -46,7 +53,7 @@ fn main() {
             let ray_direction = pixel_center - &camera_center;
             let ray = Ray::new(camera_center.clone(), ray_direction);
 
-            let pixel_color = ray_color(ray);
+            let pixel_color = ray_color(ray, &world);
             write_color(pixel_color);
         }
     }
@@ -62,28 +69,16 @@ fn write_color(color: Vector3) {
     println!("{} {} {}\n", r, g, b);
 }
 
-fn ray_color(ray: Ray) -> Vector3 {
-    let t = hit_sphere(&Vector3::new(0.0, 0.0, -1.0), 0.5, &ray);
-    if t > 0.0 {
-        let n = unit_vector(&(ray.at(t) - Vector3::new(0.0, 0.0, -1.0)));
-        0.5 * Vector3::new(n.x + 1.0, n.y + 1.0, n.z + 1.0)
+fn ray_color(ray: Ray, world: &dyn Hittable) -> Vector3 {
+    if let Some(hit) = world.hit(&ray, 0.001, f64::INFINITY) {
+        0.5 * (hit.normal + Vector3::one())
     } else {
         let unit_direction = unit_vector(&ray.direction);
         let a = 0.5 * (unit_direction.y + 1.0);
-        (1.0 - a) * Vector3::new(1.0, 1.0, 1.0) + a * Vector3::new(0.5, 0.7, 1.0)
+        (1.0 - a) * Vector3::one() + a * Vector3::new(0.5, 0.7, 1.0)
     }
 }
 
-fn hit_sphere(center: &Vector3, radius: f64, ray: &Ray) -> f64 {
-    let oc = center - &ray.origin;
-    let a = ray.direction.length_squared();
-    let h = dot(&ray.direction, &oc);
-    let c = oc.length_squared() - radius * radius;
-    let discriminant = h * h - a * c;
-
-    if discriminant < 0.0 {
-        -1.0
-    } else {
-        (h - discriminant.sqrt()) / a
-    }
+fn degrees_to_radians(degrees: f64) -> f64 {
+    degrees * PI / 180.0
 }
