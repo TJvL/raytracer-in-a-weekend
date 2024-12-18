@@ -1,5 +1,3 @@
-extern crate core;
-
 use crate::camera::Camera;
 use crate::hit::HittableList;
 use crate::sphere::Sphere;
@@ -10,6 +8,7 @@ mod hit;
 mod interval;
 mod ray;
 mod sphere;
+mod utility;
 mod vector;
 
 fn main() {
@@ -22,8 +21,10 @@ fn main() {
 
     let aspect_ratio = 16.0 / 9.0;
     let image_width: u16 = 400;
+    let samples_per_pixel: u8 = 100;
+    let max_depth: usize = 50;
 
-    let camera = Camera::new(aspect_ratio, image_width);
+    let camera = Camera::new(aspect_ratio, image_width, samples_per_pixel, max_depth);
 
     camera.render(&world);
 }
