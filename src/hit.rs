@@ -1,4 +1,5 @@
 use crate::interval::Interval;
+use crate::material::Material;
 use crate::ray::Ray;
 use crate::vector::{dot, Vector3};
 
@@ -6,15 +7,22 @@ pub trait Hittable {
     fn hit(&self, ray: &Ray, ray_t: Interval) -> Option<HitRecord>;
 }
 
-pub struct HitRecord {
+pub struct HitRecord<'obj> {
     pub point: Vector3,
     pub normal: Vector3,
+    pub material: &'obj dyn Material,
     pub t: f64,
     pub is_front_face: bool,
 }
 
-impl HitRecord {
-    pub fn new(point: Vector3, t: f64, outward_normal: Vector3, ray_direction: &Vector3) -> Self {
+impl<'obj> HitRecord<'obj> {
+    pub fn new(
+        point: Vector3,
+        t: f64,
+        outward_normal: Vector3,
+        ray_direction: &Vector3,
+        material: &'obj dyn Material,
+    ) -> Self {
         let is_front_face = dot(ray_direction, &outward_normal) < 0.0;
         let normal = if is_front_face {
             outward_normal
@@ -24,6 +32,7 @@ impl HitRecord {
         Self {
             point,
             normal,
+            material,
             t,
             is_front_face,
         }

@@ -2,7 +2,7 @@ use crate::hit::Hittable;
 use crate::interval::Interval;
 use crate::ray::Ray;
 use crate::utility::{random_from_range, CLOSEST_TO_ZERO_TO_ONE_RANGE};
-use crate::vector::{random_unit_vector, unit_vector, Vector3};
+use crate::vector::{unit_vector, Vector3};
 
 pub struct Camera {
     aspect_ratio: f64,
@@ -105,9 +105,12 @@ fn sample_square() -> Vector3 {
 fn ray_color(ray: Ray, max_depth: usize, world: &dyn Hittable) -> Vector3 {
     if max_depth == 0 {
         Vector3::zero()
-    } else if let Some(hit) = world.hit(&ray, Interval::new(0.001, f64::INFINITY)) {
-        let direction = hit.normal + random_unit_vector();
-        0.5 * ray_color(Ray::new(hit.point, direction), max_depth - 1, world)
+    } else if let Some(hit_record) = world.hit(&ray, Interval::new(0.001, f64::INFINITY)) {
+        if let Some(scatter_result) = hit_record.material.scatter(hit_record) {
+            scatter_result.attenuated * ray_color(scatter_result.scattered, max_depth - 1, world)
+        } else {
+            Vector3::zero()
+        }
     } else {
         let unit_direction = unit_vector(&ray.direction);
         let a = 0.5 * (unit_direction.y + 1.0);

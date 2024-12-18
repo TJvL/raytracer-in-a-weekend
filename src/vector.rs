@@ -37,6 +37,10 @@ pub fn random_on_hemisphere(normal: &Vector3) -> Vector3 {
     }
 }
 
+pub fn reflect(v: &Vector3, normal: &Vector3) -> Vector3 {
+    v - 2.0 * dot(&v, &normal) * normal
+}
+
 pub struct Vector3 {
     pub x: f64,
     pub y: f64,
@@ -86,6 +90,11 @@ impl Vector3 {
 
     pub fn length_squared(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
+    }
+
+    pub fn is_near_zero(&self) -> bool {
+        let s = 1e-8;
+        (self.x.abs() < s) && (self.y.abs() < s) && (self.z.abs() < s)
     }
 
     pub fn normalize(&mut self) -> &Self {
