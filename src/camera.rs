@@ -118,15 +118,23 @@ fn ray_color(ray: Ray, max_depth: usize, world: &dyn Hittable) -> Vector3 {
     }
 }
 
-fn write_color(color: Vector3) {
-    let intensity = Interval::new(0.0, 0.999);
-    let r = intensity.clamp(color.x);
-    let g = intensity.clamp(color.y);
-    let b = intensity.clamp(color.z);
+fn linear_to_gamma(linear_component: f64) -> f64 {
+    if linear_component > 0.0 {
+        linear_component.sqrt()
+    } else {
+        0.0
+    }
+}
 
-    let r_byte: u8 = (256.0 * r) as u8;
-    let g_byte: u8 = (256.0 * g) as u8;
-    let b_byte: u8 = (256.0 * b) as u8;
+fn write_color(color: Vector3) {
+    let r = linear_to_gamma(color.x);
+    let g = linear_to_gamma(color.y);
+    let b = linear_to_gamma(color.z);
+
+    let intensity = Interval::new(0.0, 0.999);
+    let r_byte: u8 = (256.0 * intensity.clamp(r)) as u8;
+    let g_byte: u8 = (256.0 * intensity.clamp(g)) as u8;
+    let b_byte: u8 = (256.0 * intensity.clamp(b)) as u8;
 
     println!("{} {} {}\n", r_byte, g_byte, b_byte);
 }
